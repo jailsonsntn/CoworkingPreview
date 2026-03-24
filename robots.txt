@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://coworkingsaudetherapi.com.br/sitemap.xml
+
+# Bloqueios de rastreio irrelevantes
+Disallow: /assets/videos/*.tmp
