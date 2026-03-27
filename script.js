@@ -288,45 +288,10 @@
   const openVideoBtn    = document.getElementById('openVideoModal');
   const competingVideos = document.querySelectorAll('.hero-video, video[data-autoplay-lazy]');
   const isMobileMedia = window.matchMedia('(max-width: 768px)').matches;
-  let presentationWarmupDone = false;
   let pausedByModal = [];
-  let stallWatchTimer = null;
-  let stallLastTime = 0;
-  let stallTicks = 0;
-
-  function warmupPresentationVideo() {
-    if (!presentVideo || presentationWarmupDone) return;
-    const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
-    const saveData = connection && connection.saveData;
-    const slowNetwork = connection && /2g/.test(connection.effectiveType || '');
-    if (saveData || slowNetwork) return;
-
-    presentVideo.preload = 'auto';
-    presentVideo.load();
-    presentationWarmupDone = true;
-  }
-
-  if (openVideoBtn) {
-    openVideoBtn.addEventListener('mouseenter', warmupPresentationVideo, { passive: true });
-    openVideoBtn.addEventListener('touchstart', warmupPresentationVideo, { passive: true });
-    openVideoBtn.addEventListener('focus', warmupPresentationVideo, { passive: true });
-  }
 
   if (presentVideo) {
-    const autoWarmup = function () {
-      if (document.visibilityState !== 'visible') return;
-      warmupPresentationVideo();
-    };
-
-    if ('requestIdleCallback' in window) {
-      window.requestIdleCallback(autoWarmup, { timeout: 2800 });
-    } else {
-      setTimeout(autoWarmup, 1800);
-    }
-
-    window.addEventListener('load', function () {
-      setTimeout(autoWarmup, 900);
-    }, { once: true });
+    presentVideo.preload = 'auto';
   }
 
   function pauseCompetingVideos() {
@@ -356,71 +321,13 @@
     pausedByModal = [];
   }
 
-  if (presentVideo) {
-    function recoverPlayback() {
-      if (!videoModal.classList.contains('active')) return;
-      presentVideo.play().catch(function () {});
-    }
-
-    function startStallWatch() {
-      if (!isMobileMedia || stallWatchTimer || !videoModal.classList.contains('active')) return;
-      stallLastTime = presentVideo.currentTime || 0;
-      stallTicks = 0;
-      stallWatchTimer = setInterval(function () {
-        if (!videoModal.classList.contains('active') || presentVideo.paused || presentVideo.ended) return;
-        const nowTime = presentVideo.currentTime || 0;
-        const frozen = Math.abs(nowTime - stallLastTime) < 0.01;
-        if (frozen && presentVideo.readyState < 3) {
-          stallTicks += 1;
-        } else {
-          stallTicks = 0;
-        }
-
-        if (stallTicks >= 2) {
-          const targetTime = nowTime + 0.05;
-          if (!Number.isNaN(presentVideo.duration) && Number.isFinite(presentVideo.duration)) {
-            presentVideo.currentTime = Math.min(targetTime, Math.max(0, presentVideo.duration - 0.1));
-          } else {
-            presentVideo.currentTime = targetTime;
-          }
-          presentVideo.play().catch(function () {});
-          stallTicks = 0;
-        }
-
-        stallLastTime = presentVideo.currentTime || nowTime;
-      }, 1200);
-    }
-
-    function stopStallWatch() {
-      if (!stallWatchTimer) return;
-      clearInterval(stallWatchTimer);
-      stallWatchTimer = null;
-      stallTicks = 0;
-    }
-
-    presentVideo.addEventListener('play', startStallWatch);
-    presentVideo.addEventListener('pause', stopStallWatch);
-    presentVideo.addEventListener('ended', stopStallWatch);
-    presentVideo.addEventListener('stalled', recoverPlayback);
-    presentVideo.addEventListener('waiting', recoverPlayback);
-  }
-
   function openVideoModal() {
     videoModal.classList.add('active');
     document.body.style.overflow = 'hidden';
     pauseCompetingVideos();
     if (presentVideo) {
-      presentVideo.preload = 'auto';
-      presentVideo.load();
       presentVideo.currentTime = 0;
-      if (presentVideo.readyState >= 2) {
-        presentVideo.play().catch(function () {});
-      } else {
-        const onCanPlay = function () {
-          presentVideo.play().catch(function () {});
-        };
-        presentVideo.addEventListener('canplay', onCanPlay, { once: true });
-      }
+      presentVideo.play().catch(function () {});
     }
   }
 
@@ -430,10 +337,6 @@
     if (presentVideo) {
       presentVideo.pause();
       presentVideo.currentTime = 0;
-      if (stallWatchTimer) {
-        clearInterval(stallWatchTimer);
-        stallWatchTimer = null;
-      }
     }
     resumeCompetingVideos();
   }
