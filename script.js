@@ -286,7 +286,9 @@
   const videoModalBack  = document.getElementById('videoModalBackdrop');
   const presentVideo    = document.getElementById('presentationVideo');
   const openVideoBtn    = document.getElementById('openVideoModal');
+  const competingVideos = document.querySelectorAll('.hero-video, video[data-autoplay-lazy]');
   let presentationPreloaded = false;
+  let pausedByModal = [];
 
   function primePresentationVideo() {
     if (!presentVideo || presentationPreloaded) return;
@@ -306,18 +308,51 @@
     openVideoBtn.addEventListener('focus', primePresentationVideo, { passive: true });
   }
 
-  if (presentVideo) {
-    presentVideo.addEventListener('stalled', function () {
-      presentVideo.load();
+  function pauseCompetingVideos() {
+    pausedByModal = [];
+    competingVideos.forEach(function (video) {
+      if (video && !video.paused && !video.ended) {
+        pausedByModal.push(video);
+        video.pause();
+      }
     });
-    presentVideo.addEventListener('waiting', function () {
+  }
+
+  function resumeCompetingVideos() {
+    pausedByModal.forEach(function (video) {
+      video.play().catch(function () {});
+    });
+    pausedByModal = [];
+  }
+
+  if (presentVideo) {
+    let recoveryTries = 0;
+    let lastRecoveryAt = 0;
+
+    function recoverPlayback() {
+      const now = Date.now();
+      if (now - lastRecoveryAt < 900) return;
+      if (recoveryTries >= 3) return;
+      recoveryTries += 1;
+      lastRecoveryAt = now;
+
+      // Evita reset completo do stream; apenas tenta retomar o decode/buffer.
       presentVideo.play().catch(function () {});
+    }
+
+    presentVideo.addEventListener('playing', function () {
+      recoveryTries = 0;
+    });
+    presentVideo.addEventListener('stalled', recoverPlayback);
+    presentVideo.addEventListener('waiting', function () {
+      recoverPlayback();
     });
   }
 
   function openVideoModal() {
     videoModal.classList.add('active');
     document.body.style.overflow = 'hidden';
+    pauseCompetingVideos();
     if (presentVideo) {
       primePresentationVideo();
       presentVideo.currentTime = 0;
@@ -332,6 +367,7 @@
       presentVideo.pause();
       presentVideo.currentTime = 0;
     }
+    resumeCompetingVideos();
   }
 
   if (openVideoBtn)    openVideoBtn.addEventListener('click', openVideoModal);
