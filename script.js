@@ -286,11 +286,40 @@
   const videoModalBack  = document.getElementById('videoModalBackdrop');
   const presentVideo    = document.getElementById('presentationVideo');
   const openVideoBtn    = document.getElementById('openVideoModal');
+  let presentationPreloaded = false;
+
+  function primePresentationVideo() {
+    if (!presentVideo || presentationPreloaded) return;
+    const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+    const saveData = connection && connection.saveData;
+    const slowNetwork = connection && /2g/.test(connection.effectiveType || '');
+    if (saveData || slowNetwork) return;
+
+    presentVideo.preload = 'auto';
+    presentVideo.load();
+    presentationPreloaded = true;
+  }
+
+  if (openVideoBtn) {
+    openVideoBtn.addEventListener('mouseenter', primePresentationVideo, { passive: true });
+    openVideoBtn.addEventListener('touchstart', primePresentationVideo, { passive: true });
+    openVideoBtn.addEventListener('focus', primePresentationVideo, { passive: true });
+  }
+
+  if (presentVideo) {
+    presentVideo.addEventListener('stalled', function () {
+      presentVideo.load();
+    });
+    presentVideo.addEventListener('waiting', function () {
+      presentVideo.play().catch(function () {});
+    });
+  }
 
   function openVideoModal() {
     videoModal.classList.add('active');
     document.body.style.overflow = 'hidden';
     if (presentVideo) {
+      primePresentationVideo();
       presentVideo.currentTime = 0;
       presentVideo.play().catch(function () {});
     }
