@@ -111,6 +111,7 @@
   const galleryItems  = document.querySelectorAll('.gallery-item');
   const lightbox      = document.getElementById('lightbox');
   const lightboxImg   = document.getElementById('lightboxImg');
+  const lightboxVideo = document.getElementById('lightboxVideo');
   const lightboxClose = document.getElementById('lightboxClose');
   const lightboxPrev  = document.getElementById('lightboxPrev');
   const lightboxNext  = document.getElementById('lightboxNext');
@@ -120,8 +121,11 @@
 
   galleryItems.forEach(function (item, idx) {
     const img = item.querySelector('img');
-    if (img) {
-      galleryImages.push({ src: img.src, alt: img.alt });
+    const vid = item.querySelector('video');
+    if (vid) {
+      galleryImages.push({ src: item.dataset.video || vid.src, alt: 'Vídeo do drone', type: 'video' });
+    } else if (img) {
+      galleryImages.push({ src: img.src, alt: img.alt, type: 'image' });
     }
     item.addEventListener('click', function () {
       openLightbox(idx);
@@ -138,16 +142,32 @@
   function closeLightbox() {
     lightbox.classList.remove('active');
     document.body.style.overflow = '';
+    lightboxVideo.pause();
+    lightboxVideo.src = '';
+    lightboxVideo.style.display = 'none';
+    lightboxImg.style.display = '';
   }
 
   function setLightboxImage(idx) {
     if (!galleryImages[idx]) return;
-    lightboxImg.style.opacity = '0';
-    setTimeout(function () {
-      lightboxImg.src = galleryImages[idx].src;
-      lightboxImg.alt = galleryImages[idx].alt;
-      lightboxImg.style.opacity = '1';
-    }, 120);
+    const entry = galleryImages[idx];
+    if (entry.type === 'video') {
+      lightboxImg.style.display = 'none';
+      lightboxVideo.style.display = 'block';
+      lightboxVideo.src = entry.src;
+      lightboxVideo.play();
+    } else {
+      lightboxVideo.pause();
+      lightboxVideo.src = '';
+      lightboxVideo.style.display = 'none';
+      lightboxImg.style.display = '';
+      lightboxImg.style.opacity = '0';
+      setTimeout(function () {
+        lightboxImg.src = entry.src;
+        lightboxImg.alt = entry.alt;
+        lightboxImg.style.opacity = '1';
+      }, 120);
+    }
   }
 
   lightboxImg.style.transition = 'opacity .2s';
