@@ -283,6 +283,8 @@ ul { list-style: none; }
   width: 100%; height: 100%;
   display: block;
   object-fit: contain;
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 .video-modal-footer {
   display: flex;
@@ -1141,6 +1143,34 @@ ul { list-style: none; }
 
 @media (max-width: 768px) {
   .section-padding { padding: 70px 0; }
+
+  .video-modal {
+    padding: 0;
+    align-items: flex-end;
+  }
+  .video-modal-backdrop {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+  .video-modal-box {
+    width: 100%;
+    max-width: 100%;
+    border: none;
+    border-radius: 0;
+    background: #000;
+    box-shadow: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    transform: none;
+    opacity: 1;
+  }
+  .video-modal.active .video-modal-box {
+    transform: none;
+    opacity: 1;
+  }
+  .video-modal-footer {
+    padding: .8rem 1rem;
+  }
 
   .nav-links {
     position: fixed;

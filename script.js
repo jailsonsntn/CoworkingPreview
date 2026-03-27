@@ -299,10 +299,7 @@
     competingVideos.forEach(function (video) {
       if (!video) return;
       const wasPlaying = !video.paused && !video.ended;
-      pausedByModal.push({ video: video, preload: video.preload, wasPlaying: wasPlaying });
-      if (isMobileMedia) {
-        video.preload = 'none';
-      }
+      pausedByModal.push({ video: video, wasPlaying: wasPlaying });
       if (wasPlaying) {
         video.pause();
       }
@@ -313,7 +310,6 @@
     pausedByModal.forEach(function (item) {
       const video = item.video;
       if (!video) return;
-      video.preload = item.preload || 'metadata';
       if (item.wasPlaying) {
         video.play().catch(function () {});
       }
