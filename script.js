@@ -77,6 +77,8 @@
   /* ---- Parallax sutil no hero ---- */
   const heroContent = document.querySelector('.hero-content');
   const heroOverlay = document.querySelector('.hero-overlay');
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const isMobileViewport = window.matchMedia('(max-width: 768px)').matches;
 
   function heroParallax() {
     const scrollY = window.scrollY;
@@ -90,7 +92,31 @@
       }
     }
   }
-  window.addEventListener('scroll', heroParallax, { passive: true });
+  if (!reduceMotion && !isMobileViewport) {
+    window.addEventListener('scroll', heroParallax, { passive: true });
+  }
+
+  /* ---- Lazy autoplay para vídeos secundários ---- */
+  const lazyAutoplayVideos = document.querySelectorAll('video[data-autoplay-lazy]');
+
+  if ('IntersectionObserver' in window && lazyAutoplayVideos.length) {
+    const videoObserver = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        const video = entry.target;
+        if (entry.isIntersecting && entry.intersectionRatio > 0.55) {
+          video.play().catch(function () {});
+        } else {
+          video.pause();
+        }
+      });
+    }, { threshold: [0, 0.55, 1] });
+
+    lazyAutoplayVideos.forEach(function (video) {
+      video.muted = true;
+      video.setAttribute('playsinline', '');
+      videoObserver.observe(video);
+    });
+  }
 
   /* ---- Back to Top ---- */
   const backToTop = document.getElementById('backToTop');
@@ -155,7 +181,7 @@
       lightboxImg.style.display = 'none';
       lightboxVideo.style.display = 'block';
       lightboxVideo.src = entry.src;
-      lightboxVideo.play();
+      lightboxVideo.play().catch(function () {});
     } else {
       lightboxVideo.pause();
       lightboxVideo.src = '';

@@ -141,8 +141,8 @@
 
   <!-- ===== HERO ===== -->
   <section class="hero" id="home">
-    <video class="hero-video" autoplay muted loop playsinline preload="auto">
-      <source src="assets/videos/homebarfixo.mp4" type="video/mp4" />
+    <video class="hero-video" autoplay muted loop playsinline preload="metadata">
+      <source src="assets/videos/homebarfixo.webm" type="video/webm" />
     </video>
     <div class="hero-overlay"></div>
     <div class="hero-content" data-scroll-reveal>
@@ -284,7 +284,7 @@
       <div class="gallery-grid" data-scroll-reveal>
         <!-- 1. Vídeo do drone -->
         <div class="gallery-item gallery-item--large gallery-item--video" data-video="assets/galeria de fotos/videodrone.mp4">
-          <video src="assets/galeria de fotos/videodrone.mp4" muted loop playsinline autoplay></video>
+          <video src="assets/galeria de fotos/videodrone.mp4" muted loop playsinline preload="none" poster="assets/galeria de fotos/fachada da frente do Coworking.jpeg" data-autoplay-lazy></video>
           <div class="gallery-overlay"><i class="fa-solid fa-play"></i></div>
         </div>
         <!-- 2. Fachada da frente -->
@@ -431,7 +431,7 @@
       </div>
       <div class="map-wrap" data-scroll-reveal>
         <div class="map-video-card">
-          <video autoplay muted loop playsinline>
+          <video muted loop playsinline preload="none" data-autoplay-lazy>
             <source src="assets/videos/videolocalendereco.mp4" type="video/mp4" />
           </video>
         </div>
@@ -562,7 +562,7 @@
       </button>
       <div class="video-modal-player">
         <video id="presentationVideo" controls preload="metadata" playsinline>
-          <source src="assets/videos/videoapresentacao.mp4" type="video/mp4" />
+          <source src="assets/videos/videoapresentacao.webm" type="video/webm" />
         </video>
       </div>
       <div class="video-modal-footer">
