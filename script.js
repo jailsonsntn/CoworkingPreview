@@ -75,10 +75,34 @@
   }
 
   /* ---- Parallax sutil no hero ---- */
+  const heroVideo = document.querySelector('.hero-video');
   const heroContent = document.querySelector('.hero-content');
   const heroOverlay = document.querySelector('.hero-overlay');
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const isMobileViewport = window.matchMedia('(max-width: 768px)').matches;
+
+  function tryPlayHeroVideo() {
+    if (!heroVideo) return;
+    heroVideo.muted = true;
+    heroVideo.setAttribute('playsinline', '');
+    heroVideo.setAttribute('webkit-playsinline', '');
+    heroVideo.play().catch(function () {});
+  }
+
+  if (heroVideo) {
+    heroVideo.addEventListener('loadedmetadata', tryPlayHeroVideo);
+    heroVideo.addEventListener('canplay', tryPlayHeroVideo);
+    window.addEventListener('pageshow', tryPlayHeroVideo);
+    document.addEventListener('visibilitychange', function () {
+      if (!document.hidden) {
+        tryPlayHeroVideo();
+      }
+    });
+    if (isMobileViewport) {
+      window.addEventListener('touchstart', tryPlayHeroVideo, { passive: true, once: true });
+    }
+    tryPlayHeroVideo();
+  }
 
   function heroParallax() {
     const scrollY = window.scrollY;
